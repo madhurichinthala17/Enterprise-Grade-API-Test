@@ -1,6 +1,8 @@
 import pytest
 import requests
 from utils.api_client import APIClient
+from validators.schema_validator import SchemaValidator
+from validators.response_validator import ResponseValidator
 
 
 @pytest.fixture(scope="class")
@@ -9,10 +11,35 @@ def api_client():
     yield client
     client.close()
 
+@pytest.mark.products
 class Testproducts:
 
+    @pytest.mark.positive
     def test_get_all_products(self,api_client):
         response = api_client.get("/products")
+        ResponseValidator.validate_status_code(response,200)
+        ResponseValidator.validate_response_time(response,api_client.timeout)
+        ResponseValidator.validate_array_not_empty(response)
+        data =response.json()
+        for product in data:
+            assert SchemaValidator.Validate_product_schema(product)
+
+    @pytest.mark.positive
+    def test_get_single_product(self,api_client):
+        response =api_client.get("/products/1")
+        ResponseValidator.validate_status_code(response,200)
+        ResponseValidator.validate_response_time(response,api_client.timeout)
+        data =response.json()
+        assert data["id"] ==1
+        assert SchemaValidator.Validate_product_schema(data)
+
+    @pytest.mark.negative
+    def test_get_product_with_invalid_id(self,api_client):
+        ids = [99999, -1, "abc",999999999,"!@#"]
+        for id in ids:
+            response =api_client.get(f"/products/{id}")
+            ResponseValidator.validate_product_not_found(response)
+
 
    
 

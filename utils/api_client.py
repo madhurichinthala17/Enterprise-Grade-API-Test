@@ -1,9 +1,10 @@
+import pytest
 from config.config import Config
 import requests
 
 class APIClient:
-    def __init__(self,base_url):
-        self.base_url= base_url or Config.BASEURL
+    def __init__(self):
+        self.base_url= Config.BASEURL
         self.timeout = Config.TIMEOUT
         self.headers=Config.HEADERS.copy()
         self.session=requests.sessions.Session()
@@ -25,7 +26,7 @@ class APIClient:
 
     def post(self,endpoint,data=None,headers=None):
         url=f"{self.base_url}{endpoint}"
-        request_headers=self.headers.copy
+        request_headers=self.headers.copy()
         if headers:
             request_headers=self.headers.update(headers)
 
@@ -38,4 +39,8 @@ class APIClient:
         except requests.exceptions.RequestException as e:
             print(e)
             raise
+
+    def close(self):
+        """Close the requests session"""
+        self.session.close()
 
