@@ -54,6 +54,30 @@ class APIClient:
             print(e)
             raise
 
+    def put(self,endpoint,data=None,headers=None):
+        url =f"{self.base_url}{endpoint}"
+        request_headers=self.headers.copy()
+        if headers:
+           request_headers.update(headers)
+        try:
+           response=self.session.put(url,json=data,headers=request_headers,timeout=self.timeout)
+        except requests.exceptions.RequestException as e:
+           print(e)
+           raise
+        return response
+    
+    def patch(self,endpoint,data=None,headers=None):
+        url=f"{self.base_url}{endpoint}"
+        request_headers=self.headers.copy()
+        if headers:
+            request_headers.update(headers)
+        try:
+            response=self.session.patch(url,json=data,headers=request_headers,timeout=self.timeout)
+            return response
+        except requests.exceptions.RequestException as e:
+            print(e)
+            raise
+
     def close(self):
         """Close the requests session"""
         self.session.close()
