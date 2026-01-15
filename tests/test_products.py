@@ -61,4 +61,37 @@ class Testproducts:
             sorted_prices =sorted(prices,reverse=(order=="desc"))
             assert prices == sorted_prices
 
+    @pytest.mark.negative 
+    @pytest.mark.xfail(reason="API allows negative limit and returns all products")
+    def test_get_products_with_negative_limit(self,api_client):
+        response =api_client.get("/products",params={"limit":-5})
+        #This should be 400 but returns 100
+        ResponseValidator.validate_status_code(response,400)
+        data =response.json()
+        #This should be empty but returns 15
+        assert len(data)== 0
+
+    @pytest.mark.positive
+    def test_get_all_products(self,api_client):
+        response = api_client.get("/products/categories")
+        ResponseValidator.validate_status_code(response,200)
+        ResponseValidator.validate_response_time(response,api_client.timeout)
+        ResponseValidator.validate_array_not_empty(response)
+        data =response.json()
+        assert len(data) >0
+
+    @pytest.mark.positive
+    def test_get_products_by_category(self,api_client):
+        categories =["electronics","jewelery","men's clothing","women's clothing"]
+        for category in categories:
+            response =api_client.get(f"/products/category/{category}")
+            ResponseValidator.validate_status_code(response,200)
+            ResponseValidator.validate_response_time(response,api_client.timeout)
+            ResponseValidator.validate_array_not_empty(response)
+            data =response.json()
+            for product in data:
+                assert product["category"] == category
+                assert SchemaValidator.Validate_product_schema(product)
+
+
 
