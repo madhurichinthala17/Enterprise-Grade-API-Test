@@ -40,6 +40,20 @@ class APIClient:
             print(e)
             raise
 
+    def delete(self,endpoint,headers=None):
+        url=f"{self.base_url}{endpoint}"
+        request_headers=self.headers.copy()
+        if headers:
+            request_headers.update(headers)
+        try:
+            response=self.session.delete(url,
+                                         headers=request_headers,
+                                         timeout=self.timeout)
+            return response
+        except requests.exceptions.RequestException as e:
+            print(e)
+            raise
+
     def close(self):
         """Close the requests session"""
         self.session.close()

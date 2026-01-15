@@ -93,5 +93,88 @@ class Testproducts:
                 assert product["category"] == category
                 assert SchemaValidator.Validate_product_schema(product)
 
+    @pytest.mark.negative
+    def test_get_products_by_invalid_category(self,api_client):
+        invalid_categories =["","!@#$%"]
+        for category in invalid_categories:
+            response =api_client.get(f"/products/category/{category}")
+            ResponseValidator.validate_product_not_found(response)
 
+    @pytest.mark.positive
+    def test_create_new_product(self,api_client):
+        new_product ={
+            "title": "Test Product",
+            "price": 29.99,
+            "description": "This is a test product",
+            "image": "https://i.pravatar.cc",
+            "category": "electronics"
+        }
+        response =api_client.post("/products",data=new_product)
+        ResponseValidator.validate_status_code(response,201)
+        ResponseValidator.validate_response_time(response,api_client.timeout)
+        data =response.json()
+        assert "id" in data is not None
+        assert data["title"] == new_product["title"]
+        assert data["price"] == new_product["price"]
+        assert data["description"] == new_product["description"]
+        assert data["category"] == new_product["category"]
+        assert SchemaValidator.Validate_product_schema(data)
 
+    @pytest.mark.negative
+    @pytest.mark.xfail(reason="API allows creation without title and returns 201")
+    def test_create_product_without_title(self,api_client):
+        object ={
+            "price": 0.1,
+            "description": "string",
+            "category": "string",
+            "image": "http://example.com"
+        }
+        response =api_client.post("/products",data=object)
+        #This should be 400 but API returns 201
+        ResponseValidator.validate_status_code(response,400)
+
+    @pytest.mark.negative
+    @pytest.mark.xfail(reason="API allows invalid price and returns 201")
+    def test_create_product_with_invalid_price(self,api_client):
+        invalid_prices =[ -10, "abc", None]
+        for price in invalid_prices:
+            object ={
+                "title": "Invalid Price Product",
+                "price": price,
+                "description": "This product has invalid price",
+                "image": "https://i.pravatar.cc",
+                "category": "electronics"
+            }
+            response =api_client.post("/products",data=object)
+            #This should be 400 but API returns 201
+            ResponseValidator.validate_status_code(response,400)
+
+    @pytest.mark.positive
+    def test_create_product_with_longtitle(self,api_client):
+        long_title ="L" * 1000  #1000 characters long
+        new_product ={
+            "title": long_title,
+            "price": 49.99,
+            "description": "Product with a very long title",
+            "image": "https://i.pravatar.cc",
+            "category": "jewelery"
+        }
+        response =api_client.post("/products",data=new_product)
+        ResponseValidator.validate_status_code(response,201)
+        data =response.json()
+        assert data["title"] == long_title
+        assert SchemaValidator.Validate_product_schema(data)
+
+    @pytest.mark.negative
+    @pytest.mark.xfail(reason="API allows empty description and returns 201")
+    def test_create_product_with_empty_description(self,api_client):
+        product ={
+            "title": "No Description Product",
+            "price": 19.99,
+            "description": "",
+            "image": "https://i.pravatar.cc",
+            "category" : "makeup"
+        }
+        response =api_client.post("/products",data=product)
+        #This should be 400 but API returns 201
+        ResponseValidator.validate_status_code(response,400)
