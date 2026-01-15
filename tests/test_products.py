@@ -41,8 +41,14 @@ class Testproducts:
             ResponseValidator.validate_product_not_found(response)
 
 
-   
-
+    @pytest.mark.positive
+    def test_get_limited_products(self,api_client):
+        limits =[1,5,20]
+        for limit in limits:
+            response =api_client.get("/products",params ={"limit":limit})
+            ResponseValidator.validate_status_code(response,200)
+            length =len(response.json())
+            assert length == limit
 
 
 
