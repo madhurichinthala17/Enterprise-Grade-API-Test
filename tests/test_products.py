@@ -50,6 +50,15 @@ class Testproducts:
             length =len(response.json())
             assert length == limit
 
-
+    @pytest.mark.positive
+    def test_get_products_inorder(self,api_client):
+        orders =["asc","desc"]
+        for order in orders:
+            response =api_client.get("/products",params={"sort":order})
+            ResponseValidator.validate_status_code(response,200)
+            data =response.json()
+            prices =[product["id"] for product in data]
+            sorted_prices =sorted(prices,reverse=(order=="desc"))
+            assert prices == sorted_prices
 
 
