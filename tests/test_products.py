@@ -178,3 +178,21 @@ class Testproducts:
         response =api_client.post("/products",data=product)
         #This should be 400 but API returns 201
         ResponseValidator.validate_status_code(response,400)
+
+    @pytest.mark.positive
+    def test_update_product(self,api_client):
+        updated_data ={
+            "title": "Updated Product Title",
+            "price": 39.99,
+            "description": "This is an updated description",
+            "image": "https://i.pravatar.cc",
+            "category" : "skincare"
+        }
+        response=api_client.put("/products/1",data=updated_data)
+        ResponseValidator.validate_status_code(response,200)
+        product =response.json()
+        assert product["title"] == updated_data["title"]
+        assert product["price"] == updated_data["price"]
+        assert product["description"] == updated_data["description"]
+        assert product["category"] == updated_data["category"]
+        assert SchemaValidator.Validate_product_schema(product)
