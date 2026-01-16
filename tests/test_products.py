@@ -15,7 +15,7 @@ def api_client():
 class Testproducts:
 
     @pytest.mark.positive
-    def test_get_all_products(self,api_client):
+    def test_get_all_products(self,api_client: APIClient):
         response = api_client.get("/products")
         ResponseValidator.validate_status_code(response,200)
         ResponseValidator.validate_response_time(response,api_client.timeout)
@@ -25,7 +25,7 @@ class Testproducts:
             assert SchemaValidator.Validate_product_schema(product)
 
     @pytest.mark.positive
-    def test_get_single_product(self,api_client):
+    def test_get_single_product(self,api_client: APIClient):
         response =api_client.get("/products/1")
         ResponseValidator.validate_status_code(response,200)
         ResponseValidator.validate_response_time(response,api_client.timeout)
@@ -34,7 +34,7 @@ class Testproducts:
         assert SchemaValidator.Validate_product_schema(data)
 
     @pytest.mark.negative
-    def test_get_product_with_invalid_id(self,api_client):
+    def test_get_product_with_invalid_id(self,api_client: APIClient):
         ids = [99999, -1, "abc",999999999,"!@#"]
         for id in ids:
             response =api_client.get(f"/products/{id}")
@@ -42,7 +42,7 @@ class Testproducts:
 
 
     @pytest.mark.positive
-    def test_get_limited_products(self,api_client):
+    def test_get_limited_products(self,api_client: APIClient):
         limits =[1,5,20]
         for limit in limits:
             response =api_client.get("/products",params ={"limit":limit})
@@ -51,7 +51,7 @@ class Testproducts:
             assert length == limit
 
     @pytest.mark.positive
-    def test_get_products_inorder(self,api_client):
+    def test_get_products_inorder(self,api_client: APIClient):
         orders =["asc","desc"]
         for order in orders:
             response =api_client.get("/products",params={"sort":order})
@@ -63,7 +63,7 @@ class Testproducts:
 
     @pytest.mark.negative 
     @pytest.mark.xfail(reason="API allows negative limit and returns all products")
-    def test_get_products_with_negative_limit(self,api_client):
+    def test_get_products_with_negative_limit(self,api_client: APIClient):
         response =api_client.get("/products",params={"limit":-5})
         #This should be 400 but returns 100
         ResponseValidator.validate_status_code(response,400)
@@ -72,7 +72,7 @@ class Testproducts:
         assert len(data)== 0
 
     @pytest.mark.positive
-    def test_get_all_products(self,api_client):
+    def test_get_all_products(self,api_client: APIClient):
         response = api_client.get("/products/categories")
         ResponseValidator.validate_status_code(response,200)
         ResponseValidator.validate_response_time(response,api_client.timeout)
@@ -81,7 +81,7 @@ class Testproducts:
         assert len(data) >0
 
     @pytest.mark.positive
-    def test_get_products_by_category(self,api_client):
+    def test_get_products_by_category(self,api_client: APIClient):
         categories =["electronics","jewelery","men's clothing","women's clothing"]
         for category in categories:
             response =api_client.get(f"/products/category/{category}")
@@ -94,14 +94,14 @@ class Testproducts:
                 assert SchemaValidator.Validate_product_schema(product)
 
     @pytest.mark.negative
-    def test_get_products_by_invalid_category(self,api_client):
+    def test_get_products_by_invalid_category(self,api_client: APIClient):
         invalid_categories =["","!@#$%"]
         for category in invalid_categories:
             response =api_client.get(f"/products/category/{category}")
             ResponseValidator.validate_product_not_found(response)
 
     @pytest.mark.positive
-    def test_create_new_product(self,api_client):
+    def test_create_new_product(self,api_client: APIClient):
         new_product ={
             "title": "Test Product",
             "price": 29.99,
@@ -122,7 +122,7 @@ class Testproducts:
 
     @pytest.mark.negative
     @pytest.mark.xfail(reason="API allows creation without title and returns 201")
-    def test_create_product_without_title(self,api_client):
+    def test_create_product_without_title(self,api_client: APIClient):
         object ={
             "price": 0.1,
             "description": "string",
@@ -135,7 +135,7 @@ class Testproducts:
 
     @pytest.mark.negative
     @pytest.mark.xfail(reason="API allows invalid price and returns 201")
-    def test_create_product_with_invalid_price(self,api_client):
+    def test_create_product_with_invalid_price(self,api_client: APIClient):
         invalid_prices =[ -10, "abc", None]
         for price in invalid_prices:
             object ={
@@ -150,7 +150,7 @@ class Testproducts:
             ResponseValidator.validate_status_code(response,400)
 
     @pytest.mark.positive
-    def test_create_product_with_longtitle(self,api_client):
+    def test_create_product_with_longtitle(self,api_client: APIClient):
         long_title ="L" * 1000  #1000 characters long
         new_product ={
             "title": long_title,
@@ -167,7 +167,7 @@ class Testproducts:
 
     @pytest.mark.negative
     @pytest.mark.xfail(reason="API allows empty description and returns 201")
-    def test_create_product_with_empty_description(self,api_client):
+    def test_create_product_with_empty_description(self,api_client: APIClient):
         product ={
             "title": "No Description Product",
             "price": 19.99,
@@ -180,7 +180,7 @@ class Testproducts:
         ResponseValidator.validate_status_code(response,400)
 
     @pytest.mark.positive
-    def test_update_product(self,api_client):
+    def test_update_product(self,api_client: APIClient):
         updated_data ={
             "title": "Updated Product Title",
             "price": 39.99,
@@ -198,7 +198,7 @@ class Testproducts:
         assert SchemaValidator.Validate_product_schema(product)
 
     @pytest.mark.negative
-    def test_update_product_with_invalid_id(self,api_client):
+    def test_update_product_with_invalid_id(self,api_client: APIClient):
         invalid_ids =["!@#", "abc"]
         updated_data ={
             "title": "Updated Product Title",
@@ -213,22 +213,22 @@ class Testproducts:
             ResponseValidator.validate_invalid_response(response)
 
     @pytest.mark.negative
-    def test_update_empty_product(self,api_client):
+    def test_update_empty_product(self,api_client: APIClient):
         response=api_client.put("/products/1",data={})
         ResponseValidator.validate_product_not_found(response)
 
     @pytest.mark.positive
-    def test_update_product_title(self,api_client):
+    def test_update_product_title(self,api_client: APIClient):
         response=api_client.patch("/products/1",data={"title": "Patched Title"})
         ResponseValidator.validate_status_code(response,200)
     
     @pytest.mark.positive
-    def test_update_product_price(self,api_client):
+    def test_update_product_price(self,api_client: APIClient):
         response=api_client.patch("/products/1",data={"price": 59.99})
         ResponseValidator.validate_status_code(response,200)
 
     @pytest.mark.positive
-    def test_update_product_multiple_fields(self,api_client):
+    def test_update_product_multiple_fields(self,api_client: APIClient):
         updated_fields ={
             "title": "Multi-field Patch",
             "price": 79.99
@@ -237,19 +237,87 @@ class Testproducts:
         ResponseValidator.validate_status_code(response,200)
 
     @pytest.mark.positive
-    def test_delete_product(self,api_client):
+    def test_delete_product(self,api_client: APIClient):
         response=api_client.delete("/products/1")
         ResponseValidator.validate_status_code(response,200)
 
     @pytest.mark.negative
-    def test_delete_product_with_invalid_id(self,api_client):
+    def test_delete_product_with_invalid_id(self,api_client: APIClient):
         invalid_ids =["!@#", "abc"]
         for id in invalid_ids:
             response=api_client.delete(f"/products/{id}")
             ResponseValidator.validate_invalid_response(response)
 
     @pytest.mark.negative
-    def test_delete_deleted_product(self,api_client):
+    def test_delete_deleted_product(self,api_client: APIClient):
         api_client.delete("/products/2")  #First delete
         response=api_client.delete("/products/2")  #Try deleting again
         ResponseValidator.validate_product_not_found(response)
+
+    @pytest.mark.positive
+    def test_validate_prices_are_positive(self,api_client: APIClient):
+        response=api_client.get("/products")
+        ResponseValidator.validate_status_code(response,200)
+        data =response.json()
+        for product in data:
+            assert product["price"] >= 0
+
+    @pytest.mark.positive
+    def test_validate_product_images(self,api_client: APIClient):
+        response=api_client.get("/products")
+        ResponseValidator.validate_status_code(response,200)
+        data =response.json()
+        for p in data:
+            image_url=p["image"]
+            assert image_url.startswith("http://") or image_url.startswith("https://")
+
+    @pytest.mark.positive
+    def test_validate_product_titles(self,api_client: APIClient):
+        response=api_client.get("/products")
+        ResponseValidator.validate_status_code(response,200)
+        data =response.json()
+        for product in data:
+            title=product["title"]
+            assert isinstance(title,str) and len(title)>0
+
+    @pytest.mark.positive
+    def test_validate_unique_ids(self,api_client):
+        response =api_client.get("/products")
+        ResponseValidator.validate_status_code(response,200)
+        data=response.json()
+        data_size = len([ p["id"] for p in data])
+        set_size = len(set( p["id"] for p in data))
+        assert data_size == set_size
+
+    
+    @pytest.mark.positive
+    def test_validate_rating(self,api_client):
+        response =api_client.get("/products")
+        ResponseValidator.validate_status_code(response,200)
+        data=response.json()
+        for product in data:
+            rating =product["rating"]["rate"]
+            assert 0 <= rating <= 5
+            count =product["rating"]["count"]
+            assert count>=0
+
+    @pytest.mark.positive
+    def test_validate_description_length(self,api_client):
+        response =api_client.get("/products")
+        ResponseValidator.validate_status_code(response,200)
+        data=response.json()
+        for product in data:
+            description =product["description"]
+            assert isinstance(description,str) and len(description)>=0 and len(description)<=1000
+
+    @pytest.mark.positive
+    def test_validate_category_in_products(self,api_client):
+        response = api_client.get("/products/categories")
+        ResponseValidator.validate_status_code(response,200)
+        categories =response.json()
+        response =api_client.get("/products")
+        ResponseValidator.validate_status_code(response,200)
+        data =response.json()
+        for product in data:
+            assert product["category"] in categories
+    
