@@ -196,3 +196,18 @@ class Testproducts:
         assert product["description"] == updated_data["description"]
         assert product["category"] == updated_data["category"]
         assert SchemaValidator.Validate_product_schema(product)
+
+    @pytest.mark.negative
+    def test_update_product_with_invalid_id(self,api_client):
+        invalid_ids =["!@#", "abc"]
+        updated_data ={
+            "title": "Updated Product Title",
+            "price": 39.99,
+            "description": "This is an updated description",
+            "image": "https://i.pravatar.cc",
+            "category" : "skincare"
+        }
+        for id in invalid_ids:
+            response =api_client.put(f"/products/{id}",data=updated_data)
+            print(id)
+            ResponseValidator.validate_invalid_response(response)

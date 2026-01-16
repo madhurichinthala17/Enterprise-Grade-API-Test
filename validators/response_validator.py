@@ -28,3 +28,7 @@ class ResponseValidator:
     def validate_product_not_found(response):
         ResponseValidator.validate_status_code(response,200)
         ResponseValidator.validate_empty_response(response)
+
+    def validate_invalid_response(response):
+        ResponseValidator.validate_status_code(response,400)
+        ResponseValidator.validate_empty_response(response)
