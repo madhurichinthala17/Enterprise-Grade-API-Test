@@ -235,3 +235,21 @@ class Testproducts:
         }
         response=api_client.patch("/products/1",data=updated_fields)
         ResponseValidator.validate_status_code(response,200)
+
+    @pytest.mark.positive
+    def test_delete_product(self,api_client):
+        response=api_client.delete("/products/1")
+        ResponseValidator.validate_status_code(response,200)
+
+    @pytest.mark.negative
+    def test_delete_product_with_invalid_id(self,api_client):
+        invalid_ids =["!@#", "abc"]
+        for id in invalid_ids:
+            response=api_client.delete(f"/products/{id}")
+            ResponseValidator.validate_invalid_response(response)
+
+    @pytest.mark.negative
+    def test_delete_deleted_product(self,api_client):
+        api_client.delete("/products/2")  #First delete
+        response=api_client.delete("/products/2")  #Try deleting again
+        ResponseValidator.validate_product_not_found(response)
