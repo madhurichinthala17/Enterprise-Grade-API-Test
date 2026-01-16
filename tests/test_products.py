@@ -211,3 +211,27 @@ class Testproducts:
             response =api_client.put(f"/products/{id}",data=updated_data)
             print(id)
             ResponseValidator.validate_invalid_response(response)
+
+    @pytest.mark.negative
+    def test_update_empty_product(self,api_client):
+        response=api_client.put("/products/1",data={})
+        ResponseValidator.validate_product_not_found(response)
+
+    @pytest.mark.positive
+    def test_update_product_title(self,api_client):
+        response=api_client.patch("/products/1",data={"title": "Patched Title"})
+        ResponseValidator.validate_status_code(response,200)
+    
+    @pytest.mark.positive
+    def test_update_product_price(self,api_client):
+        response=api_client.patch("/products/1",data={"price": 59.99})
+        ResponseValidator.validate_status_code(response,200)
+
+    @pytest.mark.positive
+    def test_update_product_multiple_fields(self,api_client):
+        updated_fields ={
+            "title": "Multi-field Patch",
+            "price": 79.99
+        }
+        response=api_client.patch("/products/1",data=updated_fields)
+        ResponseValidator.validate_status_code(response,200)
