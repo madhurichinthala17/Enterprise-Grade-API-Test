@@ -80,3 +80,25 @@ class TestUsers:
         assert "id" in response_data, "Response must contain user ID"
         user_id = response_data["id"]
         assert user_id > 0, f"User ID must be positive, got {user_id}"
+
+    @pytest.mark.negative
+    def test_create_user_missing_fields(self,api_client):
+        incomplete_user_data ={
+            "username":"incompleteuser"
+        }
+        response=api_client.post("/users",data=incomplete_user_data)
+        ResponseValidator.validate_empty_response(response)
+
+    @pytest.mark.negative
+    def test_create_user_invalid_email(self,api_client):
+        invalid_emails =["","user@.com"]
+        for email in invalid_emails:
+            invalid_user_data={
+                "username":"invalidemailuser",
+                "password":"somepass",
+                "email":email
+            }
+            response=api_client.post("/users",data=invalid_user_data)
+            ResponseValidator.validate_empty_response(response)
+
+    
