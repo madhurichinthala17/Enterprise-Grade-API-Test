@@ -101,4 +101,49 @@ class TestUsers:
             response=api_client.post("/users",data=invalid_user_data)
             ResponseValidator.validate_empty_response(response)
 
-    
+    @pytest.mark.positive
+    def test_update_user(self,api_client):
+        user_id =1
+        updated_data={
+            "username":"updateduser",
+            "password":"updatedpass",
+            "email":"updateuser@up.com"
+        }
+        response=api_client.put(f"/users/{user_id}",data=updated_data)
+        ResponseValidator.validate_status_code(response,200)
+        response_data=response.json()
+        assert response_data["username"] == updated_data["username"]
+        assert response_data["email"] == updated_data["email"]
+
+
+    @pytest.mark.negative
+    def test_update_user_invalid_id(self,api_client):
+        invalid_ids =["abc","!@#"]
+        updated_data={
+            "username":"updateduser",
+            "password":"updatedpass",
+            "email":"updateuser@up.com"
+        }
+        for invalid_id in invalid_ids:
+            response =api_client.put(f"/users/{invalid_id}",data=updated_data)
+            ResponseValidator.validate_invalid_response(response)
+
+    @pytest.mark.negative
+    def test_update_user_invalid_email(self,api_client):
+        user_id =1
+        invalid_emails =["","user@.com"]
+        for email in invalid_emails:
+            updated_data={
+                "username":"updateduser",
+                "password":"updatedpass",
+                "email":email
+            }
+            response=api_client.put(f"/users/{user_id}",data=updated_data)
+            ResponseValidator.validate_empty_response(response)
+
+    @pytest.mark.negative
+    def test_update_user_missing_fields(self,api_client):
+        user_id =1
+        incomplete_data={}
+        response=api_client.put(f"/users/{user_id}",data=incomplete_data)
+        ResponseValidator.validate_empty_response(response)
