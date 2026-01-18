@@ -147,3 +147,19 @@ class TestUsers:
         incomplete_data={}
         response=api_client.put(f"/users/{user_id}",data=incomplete_data)
         ResponseValidator.validate_empty_response(response)
+
+
+    @pytest.mark.positive
+    def test_delete_user(self,api_client):
+        user_id =1
+        response=api_client.delete(f"/users/{user_id}")
+        ResponseValidator.validate_status_code(response,200)
+        response_data=response.json()
+        assert response_data["id"] == user_id
+
+    @pytest.mark.negative
+    def test_delete_user_invalid_id(self,api_client):
+        invalid_ids =["abc","!@#"]
+        for invalid_id in invalid_ids:
+            response=api_client.delete(f"/users/{invalid_id}")
+            ResponseValidator.validate_invalid_response(response)
