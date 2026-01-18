@@ -21,6 +21,7 @@ class TestUsers:
         ResponseValidator.validate_response_time(response,api_client.timeout)
         SchemaValidator.Validate_user_schema(response.json()[0])
 
+
     @pytest.mark.positive
     def test_get_user_by_id(self,api_client):
         response=api_client.get("/users/1")
@@ -163,3 +164,36 @@ class TestUsers:
         for invalid_id in invalid_ids:
             response=api_client.delete(f"/users/{invalid_id}")
             ResponseValidator.validate_invalid_response(response)
+
+    @pytest.mark.positive
+    def test_verify_emails(self,api_client):
+        response=api_client.get("/users")
+        ResponseValidator.validate_status_code(response,200)
+        ResponseValidator.validate_array_not_empty(response)
+        data=response.json()
+        for user in data:
+            email =user["email"]
+            assert "@" in email and "." in email.split("@")[-1], f"Invalid email format: {email}"
+
+    @pytest.mark.positive
+    def test_verify_objects_exist(self,api_client):
+        response=api_client.get("/users")
+        ResponseValidator.validate_status_code(response,200)
+        ResponseValidator.validate_array_not_empty(response)
+        data=response.json()
+        for user in data:
+            username =user["username"]
+            assert isinstance(username,str) and len(username)>0, f"Username should be a non-empty string: {username}"
+            address =user.get("address","")
+            assert address is not None, "Address field should exist"
+            phone =user.get("phone","")
+            assert isinstance(phone,str), f"Phone should be a string: {phone}"
+
+    @pytest.mark.positive
+    def test_verify_unique_usernames(self,api_client):
+        response=api_client.get("/users")
+        ResponseValidator.validate_status_code(response,200)
+        data =response.json()
+        usernames = [user["username"] for user in data]
+        unique_usernames = set(usernames)
+        assert len(usernames) == len(unique_usernames), "Usernames are not unique"
