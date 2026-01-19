@@ -151,4 +151,31 @@ class TestCarts:
             response=api_client.post("/carts",data=cart)
             ResponseValidator.validate_empty_response(response)
 
+    @pytest.mark.positive
+    def test_delete_cart(self,api_client):
+        #First create a cart to delete
+        new_cart ={
+            "userId":4,
+            "date":"2023-11-01",
+            "products":[{"productId":3,"quantity":1}]
+        }
+        create_response=api_client.post("/carts",data=new_cart)
+        ResponseValidator.validate_status_code(create_response,201)
+        cart_id =create_response.json()["id"]
+
+        #Now delete the created cart
+        delete_response=api_client.delete(f"/carts/{cart_id}")
+        ResponseValidator.validate_status_code(delete_response,200)
+
+        #Verify deletion
+        get_response=api_client.get(f"/carts/{cart_id}")
+        ResponseValidator.validate_empty_response(get_response)
+
+
+    @pytest.mark.negative
+    def test_delete_cart_with_invalid_id(self,api_client):
+        ids =["!@#","xyz"]
+        for cart_id in ids:
+            response=api_client.delete(f"/carts/{cart_id}")
+            ResponseValidator.validate_invalid_response(response)
     
