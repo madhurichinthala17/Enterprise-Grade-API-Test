@@ -178,4 +178,39 @@ class TestCarts:
         for cart_id in ids:
             response=api_client.delete(f"/carts/{cart_id}")
             ResponseValidator.validate_invalid_response(response)
+
+    @pytest.mark.positive
+    def test_update_cart(self,api_client):
+        #First create a cart to update
+        new_cart ={
+            "userId":5,
+            "date":"2023-12-01",
+            "products":[{"productId":4,"quantity":2}]
+        }
+        create_response=api_client.post("/carts",data=new_cart)
+        ResponseValidator.validate_status_code(create_response,201)
+        cart_id =create_response.json()["id"]
+        #Now update the created cart
+        updated_cart ={
+            "userId":5,
+            "date":"2023-12-15",
+            "products":[{"productId":4,"quantity":3}]
+        }
+        update_response=api_client.put(f"/carts/{cart_id}",data=updated_cart)
+        ResponseValidator.validate_status_code(update_response,200)
+        data =update_response.json()
+        SchemaValidator.Validate_cart_schema(data)
+        assert data["date"] == updated_cart["date"]
+        assert data["products"] == updated_cart["products"]
+
+    @pytest.mark.negative
+    def test_update_nonexistent_cart(self,api_client):
+        non_existent_id =9999
+        updated_cart ={
+            "userId":6,
+            "date":"2023-12-20",
+            "products":[{"productId":5,"quantity":1}]
+        }
+        response=api_client.put(f"/carts/{non_existent_id}",data=updated_cart)
+        ResponseValidator.validate_empty_response(response)
     
