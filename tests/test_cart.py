@@ -54,3 +54,58 @@ class TestCarts:
         for user_id in ids:
             response=api_client.get(f"/carts/user/{user_id}")
             ResponseValidator.validate_invalid_response(response)
+
+    @pytest.mark.positive
+    def test_get_carts_with_limit(self,api_client):
+        limit =5
+        response=api_client.get("/carts",params={"limit":limit})
+        data =response.json()
+        assert len(data) == limit
+
+    @pytest.mark.positive
+    def test_get_carts_with_sort(self,api_client):
+        order ={"desc","asc"}
+        for sort_order in order:
+            response=api_client.get("/carts",params={"sort":sort_order})
+            ResponseValidator.validate_status_code(response,200)
+            ResponseValidator.validate_array_not_empty(response)
+            data =response.json()
+            ids =[cart["id"] for cart in data]
+            sorted_ids =sorted(ids,reverse=(sort_order=="desc"))
+            assert ids == sorted_ids
+
+    @pytest.mark.positive
+    def test_get_cart_in_daterange(self,api_client):
+        start_date ="2020-01-01"
+        end_date ="2020-12-31"
+        response=api_client.get("/carts",params={"startdate":start_date,"enddate":end_date})
+        ResponseValidator.validate_status_code(response,200)
+        ResponseValidator.validate_array_not_empty(response)
+        data =response.json()
+        for cart in data:
+            assert start_date <= cart["date"] <= end_date
+
+    @pytest.mark.positive
+    def test_get_carts_with_startdate_only(self,api_client):
+        start_date ="2020-06-01"
+        response=api_client.get("/carts",params={"startdate":start_date})
+        data =response.json()
+        for cart in data:
+            assert cart["date"] >= start_date
+
+    @pytest.mark.positive
+    def test_get_carts_with_enddate_only(self,api_client):
+        end_date ="2020-06-30"
+        response=api_client.get("/carts",params={"enddate":end_date})
+        data =response.json()
+        for cart in data:
+            assert cart["date"] <= end_date
+
+    @pytest.mark.negative
+    def test_get_carts_with_invalid_dateformat(self,api_client):
+        invalid_dates =["2020/01/01","01-01-2020","June 1, 2020"]
+        for date in invalid_dates:
+            response=api_client.get("/carts",params={"startdate":date})
+            ResponseValidator.validate_empty_response(response)
+            response=api_client.get("/carts",params={"enddate":date})
+            ResponseValidator.validate_empty_response(response)
