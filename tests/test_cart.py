@@ -109,3 +109,46 @@ class TestCarts:
             ResponseValidator.validate_empty_response(response)
             response=api_client.get("/carts",params={"enddate":date})
             ResponseValidator.validate_empty_response(response)
+
+    @pytest.mark.positive
+    def test_create_cart(self,api_client):
+        new_cart ={
+            "userId":3,
+            "date":"2023-10-01",
+            "products":[
+                {"productId":1,"quantity":2},
+                {"productId":2,"quantity":1}
+            ]
+        }
+        response=api_client.post("/carts",data=new_cart)
+        ResponseValidator.validate_status_code(response,201)
+        data =response.json()
+        SchemaValidator.Validate_cart_schema(data)
+        assert data["userId"] == new_cart["userId"]
+        assert data["date"] == new_cart["date"]
+        assert data["products"] == new_cart["products"]
+
+    @pytest.mark.negative
+    def test_create_cart_with_invalid_data(self,api_client):
+        invalid_carts =[
+            {
+                "userId":"abc",
+                "date":"2023-10-01",
+                "products":[{"productId":1,"quantity":2}]
+            },
+            {
+                "userId":3,
+                "date":"10-01-2023",
+                "products":[{"productId":1,"quantity":2}]
+            },
+            {
+                "userId":3,
+                "date":"2023-10-01",
+                "products":"invalid_products"
+            }
+        ]
+        for cart in invalid_carts:
+            response=api_client.post("/carts",data=cart)
+            ResponseValidator.validate_empty_response(response)
+
+    
