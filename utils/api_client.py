@@ -78,6 +78,21 @@ class APIClient:
             print(e)
             raise
 
+    
+    def set_auth_token(self, token):
+        """Set authentication token for requests"""
+        if token:
+            self.headers["Authorization"] = f"Bearer {token}"
+            self.token = token
+        return self
+
+    def clear_auth_token(self):
+        """Clear authentication token"""
+        if "Authorization" in self.headers:
+            del self.headers["Authorization"]
+        self.token = None
+        return self
+
     def close(self):
         """Close the requests session"""
         self.session.close()
