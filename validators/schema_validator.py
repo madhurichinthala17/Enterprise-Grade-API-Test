@@ -22,5 +22,52 @@ class SchemaValidator:
             return True
         except jsonschema.exceptions.ValidationError as e:
             raise AssertionError(f"Schema validation error: {e.message}")
+        
+    #validating user schema
+    def Validate_user_schema(data):
+        schema ={
+            "type": "object",
+            "required": ["id", "email", "username", "password"],
+            "properties":{
+                "id":{"type": "integer"},
+                "email":{"type": "string"}, 
+                "username":{"type": "string"},
+                "password":{"type": "string"}
+            }    
+        }
+        try:
+            jsonschema.validate(instance=data,schema=schema)
+            return True
+        except jsonschema.exceptions.ValidationError as e:
+            raise AssertionError(f"Schema validation error: {e.message}")
+        
+
+    #validating cart schema
+    def Validate_cart_schema(data):
+        schema ={
+            "type": "object",
+            "required": ["id", "userId", "date", "products"],
+            "properties":{
+                "id":{"type": "integer"},
+                "userId":{"type": "integer"},
+                "date":{"type": "string"},
+                "products":{
+                    "type": "array",
+                    "items":{
+                        "type": "object",
+                        "required": ["productId", "quantity"],
+                        "properties":{
+                            "productId":{"type": "integer"},
+                            "quantity":{"type": "integer"}
+                        }
+                    }
+                }
+            }    
+        }
+        try:
+            jsonschema.validate(instance=data,schema=schema)
+            return True
+        except jsonschema.exceptions.ValidationError as e:
+            raise AssertionError(f"Schema validation error: {e.message}")
     
 
