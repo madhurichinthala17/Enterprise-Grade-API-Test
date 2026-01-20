@@ -214,3 +214,14 @@ class TestCarts:
         response=api_client.put(f"/carts/{non_existent_id}",data=updated_cart)
         ResponseValidator.validate_empty_response(response)
     
+    @pytest.mark.positive
+    def test_cart_has_products(self,api_client):
+        response=api_client.get("/carts/1")
+        ResponseValidator.validate_status_code(response,200)
+        data =response.json()
+        assert "products" in data
+        assert isinstance(data["products"],list)
+        assert len(data["products"]) >0
+        for product in data["products"]:
+            assert "productId" in product
+            assert "quantity" in product
